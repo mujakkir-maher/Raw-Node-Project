@@ -9,14 +9,42 @@
 const http = require('http');
 const {handleReqRes} = require('./helpers/handleReqRes');
 const environment = require('./helpers/environments');
+const data = require('./lib/data')
 
 // app object - module scaffolding
 const app = {};
 
-// configuration 
-// app.config = {
-//     port: 3000
-// };
+// testing file system 
+// @ToDo pore muche fela hobe
+
+
+// testing write...
+// data.create('test', 'newFile', {name: 'Bangladesh', language: 'Bangla'}, (err) => {
+//     console.log('error was', err);
+// })
+
+
+
+// testing read...
+data.read('test', 'newFile', (err, data) => {
+    console.log(err, data);
+})
+
+
+
+// testing update...
+// data.update('test', 'newFile', {name: 'England', language: 'English'}, (err) => {
+//     console.log(err);
+// })
+
+
+
+
+// testing delete...
+// data.delete('test', 'newFile', (err) => {
+//     console.log(err);
+// })
+
 
 // create server
 app.createServer = () => {
