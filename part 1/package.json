@@ -4,9 +4,13 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon index.js"
-  },
+  "dev": "nodemon index.js",
+  "start": "cross-env NODE_ENV=staging nodemon index",
+  "production": "cross-env NODE_ENV=production nodemon index"
+},
+
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "nodemon": "^3.1.14"
   }
 }
