@@ -2,7 +2,8 @@
     *title : userHandler handler : handler to handle user related routes
 */
 // dependencies
-const data = require('../../lib/data')
+const data = require('../../lib/data');
+const {hash} = require('../../helpers/utilities');
 
 // module scaffolding 
 const handler = {};
@@ -35,18 +36,30 @@ handler._user.post = (requestProperties, callback) => {
     && requestProperties.body.password.trim().length > 0 ?
     requestProperties.body.password : false;
 
-    const tosAgreement = typeof(requestProperties.body.tosAgreement) === 'string'
-    && requestProperties.body.tosAgreement.trim().length > 0 ?
+    const tosAgreement = typeof(requestProperties.body.tosAgreement) === 'boolean'
+    && requestProperties.body.tosAgreement === true ?
     requestProperties.body.tosAgreement : false;
 
     if(firstName && lastName && phone && password && tosAgreement) {
-        data.read('users', phone, (err, user) => {
-            if(err){
+        data.read('users', phone, (err1, user) => {
+            if(err1){
                 let userObject = {
                     firstName,
                     lastName,
                     phone,
-                }
+                    password : password,
+                    tosAgreement,
+                };
+                // store the user to db
+                data.create('users', phone, userObject, (err2) => {
+                    if(!err2){
+                        callback(200, {
+                            message : 'User was created successfully!'
+                        })
+                    } else {
+                        callback(500, {error : 'Could not create user!'});
+                    }
+                });
             } else {
                 callback(500, {
                     'error': 'There was a problem in server side!',
