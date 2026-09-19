@@ -9,6 +9,7 @@ const routes = require('../routes');
 const {notFoundHandler} = require('../handlers/routeHandlers/notFoundHandler');
 const { stat } = require('fs');
 const handler = {};
+const {parseJSON} = require('../helpers/utilities');
 
 handler.handleReqRes = (req, res) => {
     // request handling
@@ -41,6 +42,9 @@ handler.handleReqRes = (req, res) => {
 
     req.on('end', () => {
         realData += decoder.end();
+
+        requestProperties.body = parseJSON(realData);
+
         chosenHandler(requestProperties, (statusCode, payload) => {
         statusCode = typeof statusCode === 'number' ? statusCode : 500;
         payload = typeof payload === 'object' ? payload : {};
@@ -48,6 +52,7 @@ handler.handleReqRes = (req, res) => {
         const payloadString = JSON.stringify(payload);
 
         // return the final data
+        res.setHeader('Content-type', 'application/json') // server client/browser-কে জানাচ্ছে যে response-এর data JSON format-এ আসবে
         res.writeHead(statusCode);
         res.end(payloadString);
 

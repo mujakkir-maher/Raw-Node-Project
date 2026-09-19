@@ -28,7 +28,7 @@ const app = {};
 // testing read...
 data.read('test', 'newFile', (err, data) => {
     console.log(err, data);
-})
+});
 
 
 
