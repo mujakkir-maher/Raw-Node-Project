@@ -4,6 +4,7 @@
 // dependencies
 const data = require('../../lib/data');
 const {hash} = require('../../helpers/utilities');
+const {parseJSON} = require('../../helpers/utilities');
 
 // module scaffolding 
 const handler = {};
@@ -61,8 +62,8 @@ handler._user.post = (requestProperties, callback) => {
                     }
                 });
             } else {
-                callback(500, {
-                    'error': 'There was a problem in server side!',
+                callback(409, {
+                    error: 'A user with this phone number already exists!',
                 });
             }
         });
@@ -74,7 +75,29 @@ handler._user.post = (requestProperties, callback) => {
 };
 
 handler._user.get = (requestProperties, callback) => {
-    callback(200);
+    // first e check korte hobe phone number valid kina. karon ekhane phn number tai unique
+     const phone = typeof(requestProperties.queryStringObject.phone) === 'string'
+     && requestProperties.queryStringObject.phone.trim().length === 11 ?
+     requestProperties.queryStringObject.phone : false;
+
+     if(phone){
+        // ekhn kaj hoilo oi user ke khuje ber kora 
+        data.read('users', phone, (err, u) => {
+            const user = {...parseJSON(u)};
+            if(!err && user){
+                delete user.password;
+                callback(200, user);
+            } else {
+                callback(404, {
+                    error : 'Requested user was not found!'
+                });
+            }
+        });
+     } else {
+        callback(404, {
+            error : 'Requested user was not found!'
+        });
+     }
 };
 
 handler._user.put = (requestProperties, callback) => {
