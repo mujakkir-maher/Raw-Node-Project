@@ -48,7 +48,7 @@ handler._user.post = (requestProperties, callback) => {
                     firstName,
                     lastName,
                     phone,
-                    password : password,
+                    password : hash(password),
                     tosAgreement,
                 };
                 // store the user to db
