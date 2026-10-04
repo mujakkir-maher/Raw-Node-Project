@@ -5,6 +5,7 @@
 const data = require('../../lib/data');
 const {hash} = require('../../helpers/utilities');
 const {parseJSON} = require('../../helpers/utilities');
+const tokenHandler = require('./tokenHandler');
 
 // module scaffolding 
 const handler = {};
@@ -74,7 +75,7 @@ handler._user.post = (requestProperties, callback) => {
     }
 };
 
-//@todo: Authentication baki
+
 handler._user.get = (requestProperties, callback) => {
     // first e check korte hobe phone number valid kina. karon ekhane phn number tai unique
      const phone = typeof(requestProperties.queryStringObject.phone) === 'string'
@@ -82,25 +83,38 @@ handler._user.get = (requestProperties, callback) => {
      requestProperties.queryStringObject.phone : false;
 
      if(phone){
-        // ekhn kaj hoilo oi user ke khuje ber kora 
-        data.read('users', phone, (err, u) => {
-            const user = {...parseJSON(u)};
-            if(!err && user){
-                delete user.password;
-                callback(200, user);
+        // verify token
+        const token = typeof(requestProperties.headerObject.token) === 'string' ?
+                requestProperties.headerObject.token : false;
+
+        tokenHandler._token.verify(token, phone, (tokenId) => {
+            if(tokenId){
+                // ekhn kaj hoilo oi user ke khuje ber kora 
+                data.read('users', phone, (err, u) => {
+                    const user = {...parseJSON(u)};
+                    if(!err && user){
+                        delete user.password;
+                        callback(200, user);
+                    } else {
+                        callback(404, {
+                            error : 'Requested user was not found!'
+                        });
+                    }
+                });
             } else {
-                callback(404, {
-                    error : 'Requested user was not found!'
+                callback(403, {
+                    error : 'Authentication failure!',
                 });
             }
-        });
+        });      
+
      } else {
         callback(404, {
             error : 'Requested user was not found!'
         });
      }
 };
-//@todo: Authentication baki
+
 handler._user.put = (requestProperties, callback) => {
 
     const phone = typeof(requestProperties.body.phone) === 'string'
@@ -121,7 +135,14 @@ handler._user.put = (requestProperties, callback) => {
 
         if(phone){
             if(firstName || lastName || password) {
-                // ekhane check korte hobe je number diya search kora hocche seti DB te ache kina
+
+               const token = typeof(requestProperties.headerObject.token) === 'string' ?
+                requestProperties.headerObject.token : false;
+
+        tokenHandler._token.verify(token, phone, (tokenId) => {
+            if(tokenId){
+                // ekhn kaj hoilo oi user ke khuje ber kora 
+                 // ekhane check korte hobe je number diya search kora hocche seti DB te ache kina
                 data.read('users', phone, (err1, uData) => {
                     const userData = {...parseJSON(uData)};
                     if(!err1 && userData){
@@ -153,6 +174,14 @@ handler._user.put = (requestProperties, callback) => {
                         });
                     }
                 });
+               
+            } else {
+                callback(403, {
+                    error : 'Authentication failure!',
+                });
+            }
+        });  
+               
             } else {
                 callback(400, {
                     error: 'You have a problem in your request!',
@@ -164,14 +193,21 @@ handler._user.put = (requestProperties, callback) => {
             });
         }
 };
-//@todo: Authentication baki
+
 handler._user.delete = (requestProperties, callback) => {
     const phone = typeof(requestProperties.body.phone) === 'string'
         && requestProperties.body.phone.trim().length === 11 ?
         requestProperties.body.phone : false;
 
         if(phone){
-            data.read('users', phone, (err1, userData) => {
+
+             // verify token
+        const token = typeof(requestProperties.headerObject.token) === 'string' ?
+                requestProperties.headerObject.token : false;
+
+        tokenHandler._token.verify(token, phone, (tokenId) => {
+            if(tokenId){
+                data.read('users', phone, (err1, userData) => {
                 if(!err1 && userData){
                     data.delete('users', phone, (err2) => {
                         if(!err2) {
@@ -190,6 +226,12 @@ handler._user.delete = (requestProperties, callback) => {
                     });
                 }
             });
+            } else {
+                callback(403, {
+                    error : 'Authentication failure!',
+                });
+            }
+        });     
         } else {
             callback(400, {
                 error: "There was a problem in your request!",
