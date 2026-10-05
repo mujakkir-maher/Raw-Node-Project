@@ -202,39 +202,39 @@ handler._user.delete = (requestProperties, callback) => {
         if(phone){
 
              // verify token
-        const token = typeof(requestProperties.headerObject.token) === 'string' ?
-                requestProperties.headerObject.token : false;
+            const token = typeof(requestProperties.headerObject.token) === 'string' ?
+                    requestProperties.headerObject.token : false;
 
-        tokenHandler._token.verify(token, phone, (tokenId) => {
-            if(tokenId){
-                data.read('users', phone, (err1, userData) => {
-                if(!err1 && userData){
-                    data.delete('users', phone, (err2) => {
-                        if(!err2) {
-                            callback(200, {
-                                message: "User was deleted successfully!",
-                            });
-                        } else {
-                            callback(500, {
-                                error: "There was a server side error!",
-                            });
-                        }
-                    });
+            tokenHandler._token.verify(token, phone, (tokenId) => {
+                if(tokenId){
+                    data.read('users', phone, (err1, userData) => {
+                    if(!err1 && userData){
+                        data.delete('users', phone, (err2) => {
+                            if(!err2) {
+                                callback(200, {
+                                    message: "User was deleted successfully!",
+                                });
+                            } else {
+                                callback(500, {
+                                    error: "There was a server side error!",
+                                });
+                            }
+                        });
+                    } else {
+                        callback(500, {
+                            error: "There was a server side error!",
+                        });
+                    }
+                });
                 } else {
-                    callback(500, {
-                        error: "There was a server side error!",
+                    callback(403, {
+                        error : 'Authentication failure!',
                     });
                 }
-            });
+            });     
             } else {
-                callback(403, {
-                    error : 'Authentication failure!',
-                });
-            }
-        });     
-        } else {
-            callback(400, {
-                error: "There was a problem in your request!",
+                callback(400, {
+                    error: "There was a problem in your request!",
             });
         }
 };
