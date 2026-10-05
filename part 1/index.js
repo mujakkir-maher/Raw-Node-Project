@@ -9,7 +9,8 @@
 const http = require('http');
 const {handleReqRes} = require('./helpers/handleReqRes');
 const environment = require('./helpers/environments');
-const data = require('./lib/data')
+const data = require('./lib/data');
+const {sendTwilioSMS} = require('./helpers/notification');
 
 // app object - module scaffolding
 const app = {};
@@ -45,6 +46,16 @@ const app = {};
 //     console.log(err);
 // })
 
+
+// TOdo, pore delete kore feilo 
+sendTwilioSMS('01616423952', 'Hello My World!', (err) => {
+    console.log(`This is the error`, err);
+});
+
+// configuration
+app.config = {
+    port : 3000,
+};
 
 // create server
 app.createServer = () => {
